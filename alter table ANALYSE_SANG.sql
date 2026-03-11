@@ -1,3 +1,9 @@
+/*==============================================================*/
+/* Nom de SGBD :  ORACLE Version 11g                            */
+/* Date de création :  11/03/2026 14:56:23                      */
+/*==============================================================*/
+
+
 alter table ANALYSE_SANG
    drop constraint FK_ANALYSE__FK_ANALYS_PATIENT;
 
@@ -22,14 +28,14 @@ alter table LOT_MEDICAMENT
 alter table LOT_MEDICAMENT
    drop constraint FK_LOT_MEDI_REFERENCE_PERSONNE;
 
-alter table PATHOLOGIE_DETAIL
-   drop constraint FK_PATHOLOG_FK_PATHOL_PATIENT;
-
 alter table PATIENT
    drop constraint FK_PATIENT_FK_PATIEN_CENTRE;
 
 alter table PATIENT
    drop constraint FK_PATIENT_REFERENCE_PERSONNE;
+
+alter table PAT_DETAIL
+   drop constraint FK_PAT_DETA_FK_PAT_D__PATIENT;
 
 alter table VISITE_QUOTIDIENNE
    drop constraint FK_VISITE_Q_FK_VISITE_PATIENT;
@@ -63,21 +69,21 @@ drop index FK_LOT_MEDICAMENT_PATIENT_FK;
 
 drop table LOT_MEDICAMENT cascade constraints;
 
-drop index FK_PATH_DETAIL_PATIENT_FK;
-
-drop table PATHOLOGIE_DETAIL cascade constraints;
-
 drop index REFERENCE_13_FK;
 
 drop index FK_PATIENT_CENTRE_FK;
 
 drop table PATIENT cascade constraints;
 
+drop index FK_PAT_D_PATIENT_FK;
+
+drop table PAT_DETAIL cascade constraints;
+
 drop table PERSONNEL cascade constraints;
 
 drop index REFERENCE_11_FK;
 
-drop index FK_VISITE_PATIENT_FK;
+drop index FK_VISITE_Q_PATIENT_FK;
 
 drop table VISITE_QUOTIDIENNE cascade constraints;
 
@@ -91,12 +97,12 @@ create table ANALYSE_SANG
    ID_PATIENT           INTEGER              not null,
    ID_VISITE            INTEGER,
    DATE_PRELEVEMENT     DATE                 not null,
-   CHOLESTEROL          VARCHAR,
-   GLYCEMIE             VARCHAR,
-   PLAQUETTES           VARCHAR,
-   GLOBULES_ROUGES      VARCHAR,
-   GLOBULES_BLANCS      VARCHAR,
-   HEMOGLOBINE          VARCHAR,
+   CHOLESTEROL          NUMBER,
+   GLYCEMIE             NUMBER,
+   PLAQUETTES           NUMBER,
+   GLOBULES_ROUGES      NUMBER,
+   GLOBULES_BLANCS      NUMBER,
+   HEMOGLOBINE          NUMBER,
    EST_A_REFAIRE        VARCHAR2(1),
    constraint PK_ANALYSE_SANG primary key (ID_ANALYSE)
 );
@@ -211,26 +217,6 @@ create index REFERENCE_14_FK on LOT_MEDICAMENT (
 );
 
 /*==============================================================*/
-/* Table : PATHOLOGIE_DETAIL                                    */
-/*==============================================================*/
-create table PATHOLOGIE_DETAIL 
-(
-   ID_PATHO             INTEGER              not null,
-   ID_PATIENT           INTEGER              not null,
-   NOM_PATHOLOGIE       VARCHAR2(100),
-   DATE_DIAGNOSTIC      DATE,
-   EST_EXCLUANTE        VARCHAR2(1),
-   constraint PK_PATHOLOGIE_DETAIL primary key (ID_PATHO)
-);
-
-/*==============================================================*/
-/* Index : FK_PATH_DETAIL_PATIENT_FK                            */
-/*==============================================================*/
-create index FK_PATH_DETAIL_PATIENT_FK on PATHOLOGIE_DETAIL (
-   ID_PATIENT ASC
-);
-
-/*==============================================================*/
 /* Table : PATIENT                                              */
 /*==============================================================*/
 create table PATIENT 
@@ -242,8 +228,8 @@ create table PATIENT
    PRENOM_PATIENT       VARCHAR2(100),
    DATE_NAISSANCE       DATE                 not null,
    SEXE                 VARCHAR2(1),
-   TAILLE_CM            VARCHAR,
-   POIDS_KG             VARCHAR,
+   TAILLE_CM            NUMBER,
+   POIDS_KG             NUMBER,
    GROUPE_ETUDE         VARCHAR2(2),
    SOUS_GROUPE          INTEGER,
    MEDECIN_REFERENT     INTEGER,
@@ -262,6 +248,26 @@ create index FK_PATIENT_CENTRE_FK on PATIENT (
 /*==============================================================*/
 create index REFERENCE_13_FK on PATIENT (
    NUM_ADELI ASC
+);
+
+/*==============================================================*/
+/* Table : PAT_DETAIL                                           */
+/*==============================================================*/
+create table PAT_DETAIL 
+(
+   ID_PATHO             INTEGER              not null,
+   ID_PATIENT           INTEGER              not null,
+   NOM_PATHOLOGIE       VARCHAR2(100),
+   DATE_DIAGNOSTIC      DATE,
+   EST_EXCLUANTE        VARCHAR2(1),
+   constraint PK_PAT_DETAIL primary key (ID_PATHO)
+);
+
+/*==============================================================*/
+/* Index : FK_PAT_D_PATIENT_FK                                  */
+/*==============================================================*/
+create index FK_PAT_D_PATIENT_FK on PAT_DETAIL (
+   ID_PATIENT ASC
 );
 
 /*==============================================================*/
@@ -287,20 +293,20 @@ create table VISITE_QUOTIDIENNE
    NUM_ADELI            INTEGER,
    DATE_VISITE          DATE,
    NUM_CHAMBRE          INTEGER,
-   POIDS_JOUR           VARCHAR,
+   POIDS_JOUR           NUMBER,
    TENSION_SYST         INTEGER,
    TENSION_DIAST        INTEGER,
    RYTHME_CARDIAQUE     INTEGER,
-   TEMPERATURE          VARCHAR,
+   TEMPERATURE          NUMBER,
    OBSERVATIONS         VARCHAR2(1000),
    ID_MEDECIN_VALIDATEUR INTEGER,
    constraint PK_VISITE_QUOTIDIENNE primary key (ID_VISITE)
 );
 
 /*==============================================================*/
-/* Index : FK_VISITE_PATIENT_FK                                 */
+/* Index : FK_VISITE_Q_PATIENT_FK                               */
 /*==============================================================*/
-create index FK_VISITE_PATIENT_FK on VISITE_QUOTIDIENNE (
+create index FK_VISITE_Q_PATIENT_FK on VISITE_QUOTIDIENNE (
    ID_PATIENT ASC
 );
 
@@ -343,10 +349,6 @@ alter table LOT_MEDICAMENT
    add constraint FK_LOT_MEDI_REFERENCE_PERSONNE foreign key (NUM_ADELI)
       references PERSONNEL (NUM_ADELI);
 
-alter table PATHOLOGIE_DETAIL
-   add constraint FK_PATHOLOG_FK_PATHOL_PATIENT foreign key (ID_PATIENT)
-      references PATIENT (ID_PATIENT);
-
 alter table PATIENT
    add constraint FK_PATIENT_FK_PATIEN_CENTRE foreign key (ID_CENTRE)
       references CENTRE (ID_CENTRE);
@@ -355,6 +357,10 @@ alter table PATIENT
    add constraint FK_PATIENT_REFERENCE_PERSONNE foreign key (NUM_ADELI)
       references PERSONNEL (NUM_ADELI);
 
+alter table PAT_DETAIL
+   add constraint FK_PAT_DETA_FK_PAT_D__PATIENT foreign key (ID_PATIENT)
+      references PATIENT (ID_PATIENT);
+
 alter table VISITE_QUOTIDIENNE
    add constraint FK_VISITE_Q_FK_VISITE_PATIENT foreign key (ID_PATIENT)
       references PATIENT (ID_PATIENT);
@@ -362,3 +368,5 @@ alter table VISITE_QUOTIDIENNE
 alter table VISITE_QUOTIDIENNE
    add constraint FK_VISITE_Q_REFERENCE_PERSONNE foreign key (NUM_ADELI)
       references PERSONNEL (NUM_ADELI);
+
+
