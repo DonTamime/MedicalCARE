@@ -369,4 +369,29 @@ alter table VISITE_QUOTIDIENNE
    add constraint FK_VISITE_Q_REFERENCE_PERSONNE foreign key (NUM_ADELI)
       references PERSONNEL (NUM_ADELI);
 
+CREATE OR REPLACE TRIGGER TRG_SECURITE_AGE_45
+BEFORE INSERT OR UPDATE ON PATIENT
+FOR EACH ROW
+DECLARE
+   v_age NUMBER;
+BEGIN
+   -- 1. On calcule l'âge à partir de la date de naissance saisie
+   v_age := floor(months_between(sysdate, :NEW.DATE_NAISSANCE) / 12);
+
+   -- 2. La condition combinée :
+   -- SI le patient a plus de 45 ans
+   -- ET qu'il n'est PAS dans le groupe témoin (PP)
+   -- ET qu'il est dans le sous-groupe 1 (traitement quotidien complet)
+   IF v_age > 45 AND :NEW.GROUPE_ETUDE != 'PP' AND :NEW.SOUS_GROUPE = 1 THEN
+      
+      RAISE_APPLICATION_ERROR(-20006, 
+         'ERREUR PROTOCOLE : Un patient de plus de 45 ans (' || v_age || ' ans) ' ||
+         'ne peut pas être dans le sous-groupe 1 d''un groupe actif.');
+         
+   END IF;
+END;
+/
+
+
+
 
