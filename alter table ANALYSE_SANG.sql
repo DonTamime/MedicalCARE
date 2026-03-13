@@ -376,7 +376,7 @@ DECLARE
    v_age NUMBER;
 BEGIN
    -- 1. On calcule l'âge à partir de la date de naissance saisie
-   v_age := floor(months_between(sysdate, :NEW.DATE_NAISSANCE) / 12);
+   v_age := floor(months_between(sysdate, :NEW.DATE_NAISSANCE) / 12); 
 
    -- 2. La condition combinée :
    -- SI le patient a plus de 45 ans
@@ -386,12 +386,69 @@ BEGIN
       
       RAISE_APPLICATION_ERROR(-20006, 
          'ERREUR PROTOCOLE : Un patient de plus de 45 ans (' || v_age || ' ans) ' ||
-         'ne peut pas être dans le sous-groupe 1 d''un groupe actif.');
-         
+         'ne peut pas être dans le sous-groupe 1 d''un groupe actif.');    
+   END IF;
+
+   IF v_age < 18 OR v_age > 65 THEN
+      RAISE_APPLICATION_ERROR(-20008, 
+         'ERREUR PROTOCOLE : Un patient de moins de 18 ans (' || v_age || ' ans) ' ||
+         'ou de plus de 65 ans ne peut pas être inclus dans l''étude.');
    END IF;
 END;
 /
 
+CREATE OR REPLACE TRIGGER TRG_REFAIRE_TEST
+BEFORE INSERT OR UPDATE ON ANALYSE_SANG
+FOR EACH ROW 
+DECLARE 
+v_nb_anomalies NUMBER := 0 ;
+BEGIN 
+   :NEW.EST_A_REFAIRE := 'N';
+   IF :NEW.CHOLESTEROL < 1 OR :NEW.CHOLESTEROL > 3.50 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
 
+   IF :NEW.GLYCEMIE < 0.55 OR :NEW.GLYCEMIE > 2.9 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
+
+   IF :NEW.PLAQUETTES < 60000 OR :NEW.PLAQUETTES > 650000 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
+
+   IF :NEW.GLOBULES_ROUGES < 3.5 OR :NEW.GLOBULES_ROUGES > 6.5 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
+
+   IF :NEW.GLOBULES_BLANCS < 2000 OR :NEW.GLOBULES_BLANCS > 23000 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
+
+   IF :NEW.HEMOGLOBINE < 8.5 OR :NEW.HEMOGLOBINE > 18.5 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
+
+   IF v_nb_anomalies >= 3 THEN
+      :NEW.EST_A_REFAIRE := 'O';
+   END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER TRG_VERIF_NUMLOT
+BEFORE INSERT OR UPDATE ON LOT_MEDICAMENT 
+FOR EACH ROW 
+DECLARE 
+v_lotdebut VARCHAR2(10);
+v_id VARCHAR2(10);
+BEGIN
+   v_id := TO_CHAR(:NEW.ID_PATIENT);
+
+v_lotdebut :=  SUBSTR(TO_CHAR(:NEW.NUM_LOT), 1, LENGTH(v_id)); 
+
+IF v_lotdebut != v_id THEN
+   RAISE_APPLICATION_ERROR(-20007, 'Le début du numéro de lot doit correspondre à l''ID du patient.');
+END IF;
+END;
+/
 
 
