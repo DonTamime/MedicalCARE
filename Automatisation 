@@ -1,0 +1,544 @@
+/*==============================================================*/
+/* Nom de SGBD :  ORACLE Version 11g                            */
+/* Date de création :  11/03/2026 14:56:23                      */
+/*==============================================================*/
+
+
+alter table ANALYSE_SANG
+   drop constraint FK_ANALYSE__FK_ANALYS_PATIENT;
+
+alter table ANALYSE_SANG
+   drop constraint FK_ANALYSE__REFERENCE_PERSONNE;
+
+alter table ANALYSE_SANG
+   drop constraint FK_ANALYSE__REFERENCE_VISITE_Q;
+
+alter table EXAM_EEG
+   drop constraint FK_EXAM_EEG_REFERENCE_PERSONNE;
+
+alter table EXAM_EEG
+   drop constraint FK_EXAM_EEG_REFERENCE_VISITE_Q;
+
+alter table EXAM_EFFORT
+   drop constraint FK_EXAM_EFF_REFERENCE_VISITE_Q;
+
+alter table LOT_MEDICAMENT
+   drop constraint FK_LOT_MEDI_FK_LOT_ME_PATIENT;
+
+alter table LOT_MEDICAMENT
+   drop constraint FK_LOT_MEDI_REFERENCE_PERSONNE;
+
+alter table PATIENT
+   drop constraint FK_PATIENT_FK_PATIEN_CENTRE;
+
+alter table PATIENT
+   drop constraint FK_PATIENT_REFERENCE_PERSONNE;
+
+alter table PAT_DETAIL
+   drop constraint FK_PAT_DETA_FK_PAT_D__PATIENT;
+
+alter table VISITE_QUOTIDIENNE
+   drop constraint FK_VISITE_Q_FK_VISITE_PATIENT;
+
+alter table VISITE_QUOTIDIENNE
+   drop constraint FK_VISITE_Q_REFERENCE_PERSONNE;
+
+drop index REFERENCE_12_FK;
+
+drop index REFERENCE_9_FK;
+
+drop index FK_ANALYSE_SANG_PATIENT_FK;
+
+drop table ANALYSE_SANG cascade constraints;
+
+drop table CENTRE cascade constraints;
+
+drop index REFERENCE_10_FK;
+
+drop index REFERENCE_7_FK;
+
+drop table EXAM_EEG cascade constraints;
+
+drop index REFERENCE_8_FK;
+
+drop table EXAM_EFFORT cascade constraints;
+
+drop index REFERENCE_14_FK;
+
+drop index FK_LOT_MEDICAMENT_PATIENT_FK;
+
+drop table LOT_MEDICAMENT cascade constraints;
+
+drop index REFERENCE_13_FK;
+
+drop index FK_PATIENT_CENTRE_FK;
+
+drop table PATIENT cascade constraints;
+
+drop index FK_PAT_D_PATIENT_FK;
+
+drop table PAT_DETAIL cascade constraints;
+
+drop table PERSONNEL cascade constraints;
+
+drop index REFERENCE_11_FK;
+
+drop index FK_VISITE_Q_PATIENT_FK;
+
+drop table VISITE_QUOTIDIENNE cascade constraints;
+
+CREATE SEQUENCE SEQ_ANALYSE_SANG START WITH 1 INCREMENT BY 1;
+
+CREATE SEQUENCE SEQ_EXAM_EEG START WITH 1 INCREMENT BY 1; 
+
+/*==============================================================*/
+/* Table : ANALYSE_SANG                                         */
+/*==============================================================*/
+create table ANALYSE_SANG 
+(
+   ID_ANALYSE           INTEGER              not null,
+   NUM_ADELI            INTEGER,
+   ID_PATIENT           INTEGER              not null,
+   ID_VISITE            INTEGER,
+   DATE_PRELEVEMENT     DATE                 not null,
+   CHOLESTEROL          NUMBER,
+   GLYCEMIE             NUMBER,
+   PLAQUETTES           NUMBER,
+   GLOBULES_ROUGES      NUMBER,
+   GLOBULES_BLANCS      NUMBER,
+   HEMOGLOBINE          NUMBER,
+   EST_A_REFAIRE        VARCHAR2(1),
+   constraint PK_ANALYSE_SANG primary key (ID_ANALYSE) 
+);
+
+/*==============================================================*/
+/* Index : FK_ANALYSE_SANG_PATIENT_FK                           */
+/*==============================================================*/
+create index FK_ANALYSE_SANG_PATIENT_FK on ANALYSE_SANG (
+   ID_PATIENT ASC
+);
+
+/*==============================================================*/
+/* Index : REFERENCE_9_FK                                       */
+/*==============================================================*/
+create index REFERENCE_9_FK on ANALYSE_SANG (
+   ID_VISITE ASC
+);
+
+/*==============================================================*/
+/* Index : REFERENCE_12_FK                                      */
+/*==============================================================*/
+create index REFERENCE_12_FK on ANALYSE_SANG (
+   NUM_ADELI ASC
+);
+
+/*==============================================================*/
+/* Table : CENTRE                                               */
+/*==============================================================*/
+create table CENTRE 
+(
+   ID_CENTRE            INTEGER              not null,
+   NOM_CENTRE           VARCHAR2(100)        not null,
+   VILLE                VARCHAR2(100),
+   ARC_RESPONSABLE      VARCHAR2(100),
+   constraint PK_CENTRE primary key (ID_CENTRE)
+);
+
+/*==============================================================*/
+/* Table : EXAM_EEG                                             */
+/*==============================================================*/
+create table EXAM_EEG 
+(
+   ID_EEG               INTEGER              not null,
+   ID_VISITE            INTEGER,
+   NUM_ADELI            INTEGER,
+   DATE_EEG             DATE                 not null,
+   SCORE_NEUROLOGUE     INTEGER,
+   constraint PK_EXAM_EEG primary key (ID_EEG)
+);
+
+/*==============================================================*/
+/* Index : REFERENCE_7_FK                                       */
+/*==============================================================*/
+create index REFERENCE_7_FK on EXAM_EEG (
+   ID_VISITE ASC
+);
+
+/*==============================================================*/
+/* Index : REFERENCE_10_FK                                      */
+/*==============================================================*/
+create index REFERENCE_10_FK on EXAM_EEG (
+   NUM_ADELI ASC
+);
+
+/*==============================================================*/
+/* Table : EXAM_EFFORT                                          */
+/*==============================================================*/
+create table EXAM_EFFORT 
+(
+   ID_EFFORT            INTEGER              not null,
+   ID_VISITE            INTEGER,
+   DATE_TEST            DATE                 not null,
+   RYTHME_AVANT         INTEGER,
+   RYTHME_APRES         INTEGER,
+   RYTHME_REPOS_1MIN    INTEGER,
+   constraint PK_EXAM_EFFORT primary key (ID_EFFORT)
+);
+
+/*==============================================================*/
+/* Index : REFERENCE_8_FK                                       */
+/*==============================================================*/
+create index REFERENCE_8_FK on EXAM_EFFORT (
+   ID_VISITE ASC
+);
+
+/*==============================================================*/
+/* Table : LOT_MEDICAMENT                                       */
+/*==============================================================*/
+create table LOT_MEDICAMENT 
+(
+   NUM_LOT              INTEGER              not null,
+   ID_PATIENT           INTEGER              not null,
+   NUM_ADELI            INTEGER,
+   JOUR_ETUDE           INTEGER,
+   COMPOSITION          VARCHAR2(100),
+   PRIS_EFFECTIVEMENT   VARCHAR2(1),
+   constraint PK_LOT_MEDICAMENT primary key (NUM_LOT)
+);
+
+/*==============================================================*/
+/* Index : FK_LOT_MEDICAMENT_PATIENT_FK                         */
+/*==============================================================*/
+create index FK_LOT_MEDICAMENT_PATIENT_FK on LOT_MEDICAMENT (
+   ID_PATIENT ASC
+);
+
+/*==============================================================*/
+/* Index : REFERENCE_14_FK                                      */
+/*==============================================================*/
+create index REFERENCE_14_FK on LOT_MEDICAMENT (
+   NUM_ADELI ASC
+);
+
+/*==============================================================*/
+/* Table : PATIENT                                              */
+/*==============================================================*/
+create table PATIENT 
+(
+   ID_PATIENT           INTEGER              not null,
+   ID_CENTRE            INTEGER,
+   NUM_ADELI            INTEGER,
+   NOM_PATIENT          VARCHAR2(100)        not null,
+   PRENOM_PATIENT       VARCHAR2(100),
+   DATE_NAISSANCE       DATE                 not null,
+   SEXE                 VARCHAR2(1),
+   TAILLE_CM            NUMBER,
+   POIDS_KG             NUMBER,
+   GROUPE_ETUDE         VARCHAR2(2),
+   SOUS_GROUPE          INTEGER,
+   MEDECIN_REFERENT     INTEGER,
+   constraint PK_PATIENT primary key (ID_PATIENT)
+);
+
+/*==============================================================*/
+/* Index : FK_PATIENT_CENTRE_FK                                 */
+/*==============================================================*/
+create index FK_PATIENT_CENTRE_FK on PATIENT (
+   ID_CENTRE ASC
+);
+
+/*==============================================================*/
+/* Index : REFERENCE_13_FK                                      */
+/*==============================================================*/
+create index REFERENCE_13_FK on PATIENT (
+   NUM_ADELI ASC
+);
+
+/*==============================================================*/
+/* Table : PAT_DETAIL                                           */
+/*==============================================================*/
+create table PAT_DETAIL 
+(
+   ID_PATHO             INTEGER              not null,
+   ID_PATIENT           INTEGER              not null,
+   NOM_PATHOLOGIE       VARCHAR2(100),
+   DATE_DIAGNOSTIC      DATE,
+   EST_EXCLUANTE        VARCHAR2(1),
+   constraint PK_PAT_DETAIL primary key (ID_PATHO)
+);
+
+/*==============================================================*/
+/* Index : FK_PAT_D_PATIENT_FK                                  */
+/*==============================================================*/
+create index FK_PAT_D_PATIENT_FK on PAT_DETAIL (
+   ID_PATIENT ASC
+);
+
+/*==============================================================*/
+/* Table : PERSONNEL                                            */
+/*==============================================================*/
+create table PERSONNEL 
+(
+   NUM_ADELI            INTEGER              not null,
+   NOM                  VARCHAR2(100)        not null,
+   PRENOM               VARCHAR2(100),
+   SPECIALITE           VARCHAR2(100),
+   TYPE_METIER          VARCHAR2(50),
+   constraint PK_PERSONNEL primary key (NUM_ADELI)
+);
+
+/*==============================================================*/
+/* Table : VISITE_QUOTIDIENNE                                   */
+/*==============================================================*/
+create table VISITE_QUOTIDIENNE 
+(
+   ID_VISITE            INTEGER              not null,
+   ID_PATIENT           INTEGER              not null,
+   NUM_ADELI            INTEGER,
+   DATE_VISITE          DATE,
+   NUM_CHAMBRE          INTEGER,
+   POIDS_JOUR           NUMBER,
+   TENSION_SYST         INTEGER,
+   TENSION_DIAST        INTEGER,
+   RYTHME_CARDIAQUE     INTEGER,
+   TEMPERATURE          NUMBER,
+   OBSERVATIONS         VARCHAR2(1000),
+   ID_MEDECIN_VALIDATEUR INTEGER,
+   constraint PK_VISITE_QUOTIDIENNE primary key (ID_VISITE)
+);
+
+/*==============================================================*/
+/* Index : FK_VISITE_Q_PATIENT_FK                               */
+/*==============================================================*/
+create index FK_VISITE_Q_PATIENT_FK on VISITE_QUOTIDIENNE (
+   ID_PATIENT ASC
+);
+
+/*==============================================================*/
+/* Index : REFERENCE_11_FK                                      */
+/*==============================================================*/
+create index REFERENCE_11_FK on VISITE_QUOTIDIENNE (
+   NUM_ADELI ASC
+);
+
+alter table ANALYSE_SANG
+   add constraint FK_ANALYSE__FK_ANALYS_PATIENT foreign key (ID_PATIENT)
+      references PATIENT (ID_PATIENT);
+
+alter table ANALYSE_SANG
+   add constraint FK_ANALYSE__REFERENCE_PERSONNE foreign key (NUM_ADELI)
+      references PERSONNEL (NUM_ADELI);
+
+alter table ANALYSE_SANG
+   add constraint FK_ANALYSE__REFERENCE_VISITE_Q foreign key (ID_VISITE)
+      references VISITE_QUOTIDIENNE (ID_VISITE);
+
+alter table EXAM_EEG
+   add constraint FK_EXAM_EEG_REFERENCE_PERSONNE foreign key (NUM_ADELI)
+      references PERSONNEL (NUM_ADELI);
+
+alter table EXAM_EEG
+   add constraint FK_EXAM_EEG_REFERENCE_VISITE_Q foreign key (ID_VISITE)
+      references VISITE_QUOTIDIENNE (ID_VISITE);
+
+alter table EXAM_EFFORT
+   add constraint FK_EXAM_EFF_REFERENCE_VISITE_Q foreign key (ID_VISITE)
+      references VISITE_QUOTIDIENNE (ID_VISITE);
+
+alter table LOT_MEDICAMENT
+   add constraint FK_LOT_MEDI_FK_LOT_ME_PATIENT foreign key (ID_PATIENT)
+      references PATIENT (ID_PATIENT);
+
+alter table LOT_MEDICAMENT
+   add constraint FK_LOT_MEDI_REFERENCE_PERSONNE foreign key (NUM_ADELI)
+      references PERSONNEL (NUM_ADELI);
+
+alter table PATIENT
+   add constraint FK_PATIENT_FK_PATIEN_CENTRE foreign key (ID_CENTRE)
+      references CENTRE (ID_CENTRE);
+
+alter table PATIENT
+   add constraint FK_PATIENT_REFERENCE_PERSONNE foreign key (NUM_ADELI)
+      references PERSONNEL (NUM_ADELI);
+
+alter table PAT_DETAIL
+   add constraint FK_PAT_DETA_FK_PAT_D__PATIENT foreign key (ID_PATIENT)
+      references PATIENT (ID_PATIENT);
+
+alter table VISITE_QUOTIDIENNE
+   add constraint FK_VISITE_Q_FK_VISITE_PATIENT foreign key (ID_PATIENT)
+      references PATIENT (ID_PATIENT);
+
+alter table VISITE_QUOTIDIENNE
+   add constraint FK_VISITE_Q_REFERENCE_PERSONNE foreign key (NUM_ADELI)
+      references PERSONNEL (NUM_ADELI);
+
+CREATE OR REPLACE TRIGGER TRG_SECURITE_AGE_45
+BEFORE INSERT OR UPDATE ON PATIENT
+FOR EACH ROW
+DECLARE
+   v_age NUMBER;
+BEGIN
+   -- 1. On calcule l'âge à partir de la date de naissance saisie
+   v_age := floor(months_between(sysdate, :NEW.DATE_NAISSANCE) / 12); 
+
+   -- 2. La condition combinée :
+   -- SI le patient a plus de 45 ans
+   -- ET qu'il n'est PAS dans le groupe témoin (PP)
+   -- ET qu'il est dans le sous-groupe 1 (traitement quotidien complet)
+   IF v_age > 45 AND :NEW.GROUPE_ETUDE != 'PP' AND :NEW.SOUS_GROUPE = 1 THEN
+      
+      RAISE_APPLICATION_ERROR(-20006, 
+         'ERREUR PROTOCOLE : Un patient de plus de 45 ans (' || v_age || ' ans) ' ||
+         'ne peut pas être dans le sous-groupe 1 d''un groupe actif.');    
+   END IF;
+
+   IF v_age < 18 OR v_age > 65 THEN
+      RAISE_APPLICATION_ERROR(-20008, 
+         'ERREUR PROTOCOLE : Un patient de moins de 18 ans (' || v_age || ' ans) ' ||
+         'ou de plus de 65 ans ne peut pas être inclus dans l''étude.');
+   END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER TRG_REFAIRE_TEST
+BEFORE INSERT OR UPDATE ON ANALYSE_SANG
+FOR EACH ROW 
+DECLARE 
+v_nb_anomalies NUMBER := 0 ;
+BEGIN 
+   :NEW.EST_A_REFAIRE := 'N';
+   IF :NEW.CHOLESTEROL < 1 OR :NEW.CHOLESTEROL > 3.50 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
+
+   IF :NEW.GLYCEMIE < 0.55 OR :NEW.GLYCEMIE > 2.9 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
+
+   IF :NEW.PLAQUETTES < 60000 OR :NEW.PLAQUETTES > 650000 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
+
+   IF :NEW.GLOBULES_ROUGES < 3.5 OR :NEW.GLOBULES_ROUGES > 6.5 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
+
+   IF :NEW.GLOBULES_BLANCS < 2000 OR :NEW.GLOBULES_BLANCS > 23000 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
+
+   IF :NEW.HEMOGLOBINE < 8.5 OR :NEW.HEMOGLOBINE > 18.5 THEN
+      v_nb_anomalies := v_nb_anomalies + 1;
+   END IF;
+
+   IF v_nb_anomalies >= 3 THEN
+      :NEW.EST_A_REFAIRE := 'O';
+   END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER TRG_VERIF_NUMLOT
+BEFORE INSERT OR UPDATE ON LOT_MEDICAMENT 
+FOR EACH ROW 
+DECLARE 
+v_lotdebut VARCHAR2(10);
+v_id VARCHAR2(10);
+BEGIN
+   v_id := TO_CHAR(:NEW.ID_PATIENT);
+
+v_lotdebut :=  SUBSTR(TO_CHAR(:NEW.NUM_LOT), 1, LENGTH(v_id)); 
+
+IF v_lotdebut != v_id THEN
+   RAISE_APPLICATION_ERROR(-20007, 'Le début du numéro de lot doit correspondre à l''ID du patient.');
+END IF;
+END;
+/
+
+
+CREATE OR REPLACE TRIGGER TRG_AUTO_VISITES 
+AFTER INSERT ON PATIENT 
+FOR EACH ROW 
+BEGIN 
+    INSERT INTO VISITE_QUOTIDIENNE (ID_VISITE, ID_PATIENT, DATE_VISITE, OBSERVATIONS)
+    VALUES (SEQ_VISITE.NEXTVAL, :NEW.ID_PATIENT, SYSDATE, NULL);
+
+    INSERT INTO VISITE_QUOTIDIENNE (ID_VISITE, ID_PATIENT, DATE_VISITE, OBSERVATIONS)
+    VALUES (SEQ_VISITE.NEXTVAL, :NEW.ID_PATIENT, SYSDATE + 6, 'Visite auto J6');
+
+    INSERT INTO VISITE_QUOTIDIENNE (ID_VISITE, ID_PATIENT, DATE_VISITE, OBSERVATIONS)
+    VALUES (SEQ_VISITE.NEXTVAL, :NEW.ID_PATIENT, SYSDATE + 12, 'Visite auto J12');
+END;
+/
+
+CREATE OR REPLACE TRIGGER TRG_AUTO_EEG
+AFTER INSERT ON PATIENT 
+FOR EACH ROW 
+BEGIN 
+    INSERT INTO EXAM_EEG (ID_EEG, ID_VISITE, DATE_EEG, SCORE_NEUROLOGUE)
+    VALUES (SEQ_EXAM_EEG.NEXTVAL, NULL, SYSDATE, NULL);
+
+    INSERT INTO EXAM_EEG (ID_EEG, ID_VISITE, DATE_EEG, SCORE_NEUROLOGUE)
+    VALUES (SEQ_EXAM_EEG.NEXTVAL, NULL, SYSDATE + 5, NULL);
+
+    INSERT INTO EXAM_EEG (ID_EEG, ID_VISITE, DATE_EEG, SCORE_NEUROLOGUE)
+    VALUES (SEQ_EXAM_EEG.NEXTVAL, NULL, SYSDATE + 10, NULL);
+
+    INSERT INTO EXAM_EEG (ID_EEG, ID_VISITE, DATE_EEG, SCORE_NEUROLOGUE)
+    VALUES (SEQ_EXAM_EEG.NEXTVAL, NULL, SYSDATE + 15, NULL);
+END;
+/
+
+
+CREATE OR REPLACE TRIGGER TRG_ALERTE_EEG_CONSECUTIF
+BEFORE UPDATE OF SCORE_NEUROLOGUE ON EXAM_EEG
+FOR EACH ROW
+DECLARE
+   v_score_precedent INTEGER;
+   v_id_pat          INTEGER;
+BEGIN
+   -- 1. On récupère l'ID du patient lié à cette visite (via une petite jointure)
+   SELECT ID_PATIENT INTO v_id_pat 
+   FROM VISITE_QUOTIDIENNE 
+   WHERE ID_VISITE = :NEW.ID_VISITE;
+
+   -- 2. On cherche le score du DERNIER examen EEG de ce patient (avant celui-ci)
+   BEGIN
+      SELECT SCORE_NEUROLOGUE INTO v_score_precedent
+      FROM (SELECT SCORE_NEUROLOGUE 
+            FROM EXAM_EEG 
+            WHERE ID_VISITE IN (SELECT ID_VISITE FROM VISITE_QUOTIDIENNE WHERE ID_PATIENT = v_id_pat)
+            AND ID_EEG < :NEW.ID_EEG -- On prend ceux d'avant
+            ORDER BY DATE_EEG DESC)
+      WHERE ROWNUM = 1; -- On ne prend que le plus récent
+   EXCEPTION
+      WHEN NO_DATA_FOUND THEN v_score_precedent := 10; -- S'il n'y a pas d'examen avant, on met un score neutre
+   END;
+
+   -- 3. La vérification fatidique
+   IF :NEW.SCORE_NEUROLOGUE < 4 AND v_score_precedent < 4 THEN
+      RAISE_APPLICATION_ERROR(-20020, 
+         'ALERTE SÉCURITÉ : Deux scores EEG consécutifs inférieurs à 4 détectés pour ce patient ! ' ||
+         '(Actuel: ' || :NEW.SCORE_NEUROLOGUE || ', Précédent: ' || v_score_precedent || ')');
+   END IF;
+END;
+
+-
+CREATE OR REPLACE TRIGGER TRG_VERIF_IMC_AUTO
+BEFORE INSERT OR UPDATE ON PATIENT
+FOR EACH ROW
+DECLARE
+    v_imc NUMBER;
+BEGIN
+    -- Calcul de l'IMC : Poids (kg) / Taille² (m)
+    -- Attention : TAILLE_CM est en cm dans ta table, on divise par 100
+    IF :NEW.TAILLE_CM > 0 THEN
+        v_imc := :NEW.POIDS_KG / POWER((:NEW.TAILLE_CM / 100), 2);
+
+        IF v_imc < 18.5 OR v_imc > 30 THEN
+            
+            RAISE_APPLICATION_ERROR(-20030, 'INCLUSION REFUSÉE : IMC non conforme (' || ROUND(v_imc, 2) || ').');
+        END IF;
+    END IF;
+END;
+/
